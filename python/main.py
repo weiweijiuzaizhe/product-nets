@@ -4,8 +4,11 @@ from sklearn.metrics import roc_auc_score
 import utils
 from models import LR, FM, PNN1, PNN2, FNN, CCPM
 
-train_file = '../data/train.yx.txt'
-test_file = '../data/test.yx.txt'
+#train_file = '../data/train.yx.txt'
+#test_file = '../data/test.yx.txt'
+train_file = '../data/train.txt'
+test_file = '../data/test.txt'
+
 # fm_model_file = '../data/fm.model.txt'
 
 input_dim = utils.INPUT_DIM
@@ -60,7 +63,9 @@ def train(model):
                 break
 
 
-algo = 'pnn2'
+#algo = 'pnn2'
+algo = 'lr'
+
 
 if algo == 'lr':
     lr_params = {
