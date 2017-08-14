@@ -44,7 +44,7 @@ class Model:
         pkl.dump(var_map, open(model_path, 'wb'))
         print('model dumped at', model_path)
 
-#已经看懂
+
 class LR(Model):
     def __init__(self, input_dim=None, output_dim=1, init_path=None, opt_algo='gd', learning_rate=1e-2, l2_weight=0,
                  random_seed=None):
@@ -118,11 +118,7 @@ class FM(Model):
             self.sess = tf.Session(config=config)
             tf.global_variables_initializer().run(session=self.sess)
 
-#            过佳的建议:
-#            self.sess.run(tf.global_variables_initializer())
-#            pv = self.sess.run(p)
-#            print pv
-#            Factorisation-machine supported Nerual Networks(FNN)
+
 class FNN(Model):
     def __init__(self, layer_sizes=None, layer_acts=None, drop_out=None, layer_l2=None, init_path=None, opt_algo='gd',
                  learning_rate=1e-2, random_seed=None):
@@ -443,11 +439,11 @@ class PNN2(Model):
             tf.global_variables_initializer().run(session=self.sess)
 
 
-class deepFM(Model):  #按照FNN修改,但是FNN有pre-training的步骤
+class deepFM(Model): 
     def __init__(self, layer_sizes=None, layer_acts=None, drop_out=None, layer_l2=None, init_path=None, opt_algo='gd',
                  learning_rate=1e-2, random_seed=None):
         Model.__init__(self)
-        print(layer_sizes)                  # [[25, 439623, 36, 371, 4, 11029, 39491, 12, 7, 5, 4, 12, 2, 36, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8], 10, 1]
+        print(layer_sizes)                  # 形如 [[25, 439623, 36, 371, 4, 11029, 39491, 12, 7, 5,8], 10, 1]
         init_vars = []
         num_inputs = len(layer_sizes[0])    # 维度的类别
         factor_order = layer_sizes[1]       # k
