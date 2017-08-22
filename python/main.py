@@ -64,7 +64,7 @@ def train(model):
 
 
 #algo = 'pnn2'
-algo = 'lr'
+algo = 'fnn'
 
 
 if algo == 'lr':
