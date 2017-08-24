@@ -96,7 +96,7 @@ class FM(Model):
             [0, 0, 0, 0]]
             http://www.jianshu.com/p/c233e09d2f5f
             """
-            # 得到x*x的张量
+            # ??x*x???
             X_square = tf.SparseTensor(self.X.indices, tf.square(self.X.values), tf.to_int64(tf.shape(self.X)))
             xv = tf.square(tf.sparse_tensor_dense_matmul(self.X, v))
             p = 0.5 * tf.reshape(
@@ -104,7 +104,7 @@ class FM(Model):
                 [-1, output_dim])
             xw = tf.sparse_tensor_dense_matmul(self.X, w)
 
-            logits = tf.reshape(xw + b + p, [-1])    # 预测出的目标值
+            logits = tf.reshape(xw + b + p, [-1])    # ???????
             self.y_prob = tf.sigmoid(logits)         #
 
             self.loss = tf.reduce_mean(
@@ -129,20 +129,20 @@ class FNN(Model):
         num_inputs = len(layer_sizes[0])
         factor_order = layer_sizes[1]
 
-        for i in range(num_inputs):   # 初始化w,b  ,遍历从 0 到 num_input-1
+        for i in range(num_inputs):   # ???w,b  ,??? 0 ? num_input-1
             layer_input = layer_sizes[0][i]
             layer_output = factor_order
             init_vars.append(('w0_%d' % i, [layer_input, layer_output], 'tnormal', dtype))  # w0_1,w0_2,...,w0_{num_input-1}
             init_vars.append(('b0_%d' % i, [layer_output], 'zero', dtype))
 
-        #以上是第一层
+        #??????
         init_vars.append(('w1', [num_inputs * factor_order, layer_sizes[2]], 'tnormal', dtype))
         init_vars.append(('b1', [layer_sizes[2]], 'zero', dtype))
 
         for i in range(2, len(layer_sizes) - 1):
             layer_input = layer_sizes[i]
             layer_output = layer_sizes[i + 1]
-            init_vars.append(('w%d' % i, [layer_input, layer_output], 'tnormal', dtype))   # 下面就是i的下标
+            init_vars.append(('w%d' % i, [layer_input, layer_output], 'tnormal', dtype))   # ????i???
             init_vars.append(('b%d' % i, [layer_output], 'zero', dtype))
 
         self.graph = tf.Graph()
@@ -155,11 +155,11 @@ class FNN(Model):
             self.keep_prob_train = 1 - np.array(drop_out)   # 'drop_out': [0, 0],
             self.keep_prob_test = np.ones_like(drop_out)    # Return an array of ones with the same shape and type as a given array.
             self.layer_keeps = tf.placeholder(dtype)
-            self.vars = utils.init_var_map(init_vars, init_path)   # 将之前初始化的那些参数都变成tf中的层
+            self.vars = utils.init_var_map(init_vars, init_path)   # ??????????????tf???
             w0 = [self.vars['w0_%d' % i] for i in range(num_inputs)]
             b0 = [self.vars['b0_%d' % i] for i in range(num_inputs)]
-            xw = [tf.sparse_tensor_dense_matmul(self.X[i], w0[i]) for i in range(num_inputs)]   # 返回一个list
-            x = tf.concat([xw[i] + b0[i] for i in range(num_inputs)], 1)  # 在维度1上进行连接
+            xw = [tf.sparse_tensor_dense_matmul(self.X[i], w0[i]) for i in range(num_inputs)]   # ????list
+            x = tf.concat([xw[i] + b0[i] for i in range(num_inputs)], 1)  # ???1?????
             l = tf.nn.dropout(
                 utils.activate(x, layer_acts[0]),  # def activate(weights, activation_function):
                 self.layer_keeps[0])
@@ -173,8 +173,8 @@ class FNN(Model):
                         layer_acts[i]),
                     self.layer_keeps[i])
 
-            l = tf.reshape(l, [-1])                # A Tensor of the same shape of x  ,相当于打散为1维
-            self.y_prob = tf.sigmoid(l)            # 由此得到y,之后可以进行计算了
+            l = tf.reshape(l, [-1])                # A Tensor of the same shape of x  ,??????1?
+            self.y_prob = tf.sigmoid(l)            # ????y,?????????
 
             self.loss = tf.reduce_mean(
                 tf.nn.sigmoid_cross_entropy_with_logits(logits=l, labels=self.y))
@@ -182,13 +182,13 @@ class FNN(Model):
                 # for i in range(num_inputs):
                 self.loss += layer_l2[0] * tf.nn.l2_loss(tf.concat(xw, 1))
                 for i in range(1, len(layer_sizes) - 1):
-                    wi = self.vars['w%d' % i]  # 整个网络中的w都会被加入正则化
+                    wi = self.vars['w%d' % i]  # ??????w????????
                     # bi = self.vars['b%d' % i]
                     self.loss += layer_l2[i] * tf.nn.l2_loss(wi)
             self.optimizer = utils.get_optimizer(opt_algo, learning_rate, self.loss)
 
             config = tf.ConfigProto()
-            config.gpu_options.allow_growth = True   #使用allow_growth option，刚一开始分配少量的GPU容量，然后按需慢慢的增加，由于不会释放内存，所以会导致碎片
+            config.gpu_options.allow_growth = True   #??allow_growth option,?????????GPU??,?????????,????????,???????
             self.sess = tf.Session(config=config)
             tf.global_variables_initializer().run(session=self.sess)
 
@@ -443,34 +443,34 @@ class deepFM(Model):
     def __init__(self, layer_sizes=None, layer_acts=None, drop_out=None, layer_l2=None, init_path=None, opt_algo='gd',
                  learning_rate=1e-2, random_seed=None):
         Model.__init__(self)
-        print(layer_sizes)                  # 形如 [[25, 439623, 36, 371, 4, 11029, 39491, 12, 7, 5,8], 10, 1]
+        print(layer_sizes)                  # ?? [[25, 439623, 36, 371, 4, 11029, 39491, 12, 7, 5,8], 10, 1]
         init_vars = []
-        num_inputs = len(layer_sizes[0])    # 维度的类别
+        num_inputs = len(layer_sizes[0])    # ?????
         factor_order = layer_sizes[1]       # k
 
-        for i in range(num_inputs):          # 初始化w,b  ,遍历从 0 到 num_input - 1,num_inputs是field数目
-            layer_input = layer_sizes[0][i]  # 这里输入的是one_hot之后的编码,是one_hot的数目
-            layer_output = factor_order      # 每个field都被映射到了k个维度上
+        for i in range(num_inputs):          # ???w,b  ,??? 0 ? num_input - 1,num_inputs?field??
+            layer_input = layer_sizes[0][i]  # ??????one_hot?????,?one_hot???
+            layer_output = factor_order      # ??field??????k????
             init_vars.append(('w0_%d' % i, [layer_input, layer_output], 'tnormal', dtype))  # w0_1,w0_2,...,w0_{num_input-1}
             init_vars.append(('b0_%d' % i, [layer_output], 'zero', dtype))
 
-        # 以上是第一层,产生的是一个embedding
-        init_vars.append(('w1', [num_inputs * factor_order, layer_sizes[2]], 'tnormal', dtype))  # 直接和embedding层连接的那一层
+        # ??????,??????embedding
+        init_vars.append(('w1', [num_inputs * factor_order, layer_sizes[2]], 'tnormal', dtype))  # ???embedding???????
         init_vars.append(('b1', [layer_sizes[2]], 'zero', dtype))
 
-        # 原来的隐层
-        for i in range(2, len(layer_sizes) - 1):  # 减一是因为后面layer_output的下标是 i + 1
-            layer_input = layer_sizes[i]   # 这里最开始的输入是layer_size[2]
+        # ?????
+        for i in range(2, len(layer_sizes) - 1):  # ???????layer_output???? i + 1
+            layer_input = layer_sizes[i]   # ?????????layer_size[2]
             layer_output = layer_sizes[i + 1]
-            init_vars.append(('w%d' % i, [layer_input, layer_output], 'tnormal', dtype))   # 下面就是i的下标  # for var_name, var_shape, init_method, dtype in init_vars
+            init_vars.append(('w%d' % i, [layer_input, layer_output], 'tnormal', dtype))   # ????i???  # for var_name, var_shape, init_method, dtype in init_vars
             init_vars.append(('b%d' % i, [layer_output], 'zero', dtype))   #
 
-        # FM的二阶层对应的变量值
+        # FM??????????
         #for i in range(num_inputs):
         #    for j in range(i, num_inputs):
         #        init_vars.append(('fm_ww_%d_%d' % (i, j), [factor_order], 'tnormal', dtype))
 
-        # FM的一阶层对应的变量值
+        # FM??????????
         for i in range(num_inputs):
             init_vars.append(('fm_w_%d' % i, [layer_sizes[0][i],1], 'tnormal', dtype))
 
@@ -480,7 +480,7 @@ class deepFM(Model):
         with self.graph.as_default():
             if random_seed is not None:
                 tf.set_random_seed(random_seed)
-            self.X = [tf.sparse_placeholder(dtype) for i in range(num_inputs)]  # X中有num_inputs个sparse_placeholder
+            self.X = [tf.sparse_placeholder(dtype) for i in range(num_inputs)]  # X??num_inputs?sparse_placeholder
             self.y = tf.placeholder(dtype)
             self.keep_prob_train = 1 - np.array(drop_out)   # 'drop_out': [0, 0],
             self.keep_prob_test = np.ones_like(drop_out)    # Return an array of ones with the same shape and type as a given array.
@@ -488,56 +488,56 @@ class deepFM(Model):
             self.fm_ww = tf.placeholder(dtype)
             self.fm_w = tf.placeholder(dtype)
 
-            self.vars = utils.init_var_map(init_vars, init_path)      # 至此,self.vars作为一个dict,里面存放的东西:name=>tensor
-            w0 = [self.vars['w0_%d' % i] for i in range(num_inputs)]  # w0是一个list,元素是tensor,每个tensor是 input * k
-            b0 = [self.vars['b0_%d' % i] for i in range(num_inputs)]  # b0是一个list ,维度是 1*k
-            xw = [tf.sparse_tensor_dense_matmul(self.X[i], w0[i]) for i in range(num_inputs)]  # x的维度是1*input,返回一个list,内部的是tf的tensor,xw内部元素维度是1*k
+            self.vars = utils.init_var_map(init_vars, init_path)      # ??,self.vars????dict,???????:name=>tensor
+            w0 = [self.vars['w0_%d' % i] for i in range(num_inputs)]  # w0???list,???tensor,??tensor? input * k
+            b0 = [self.vars['b0_%d' % i] for i in range(num_inputs)]  # b0???list ,??? 1*k
+            xw = [tf.sparse_tensor_dense_matmul(self.X[i], w0[i]) for i in range(num_inputs)]  # x????1*input,????list,????tf?tensor,xw???????1*k
 
-            x = tf.concat([xw[i] + b0[i] for i in range(num_inputs)], 1)  # 这些tensor在维度1上进行连接,这里是把一堆的tensor变为一维的tensor,至此已经变为embedding的输出了
+            x = tf.concat([xw[i] + b0[i] for i in range(num_inputs)], 1)  # ??tensor???1?????,???????tensor?????tensor,??????embedding????
 
-            fm_xx = [tf.reduce_sum(x[i]*x[j]) for i in range(num_inputs) for j in range(i, num_inputs)]  # FM的二阶值,一个list,每个元素是 k 维度,
-            fm_x = [tf.sparse_tensor_dense_matmul(self.X[i] * self.vars['fm_w_%d' % i]) for i in range(num_inputs)]  # FM的二阶值
+            fm_xx = [tf.reduce_sum(x[i]*x[j]) for i in range(num_inputs) for j in range(i, num_inputs)]  # FM????,??list,????? k ??,
+            fm_x = [tf.sparse_tensor_dense_matmul(self.X[i] * self.vars['fm_w_%d' % i]) for i in range(num_inputs)]  # FM????
 
-            fm_xx_con = tf.concat([fm_xx[i*num_inputs + j] for i in range(num_inputs) for j in range(i, num_inputs)], 1) # fm_xx[i*num_inputs + j] 是一个值
+            fm_xx_con = tf.concat([fm_xx[i*num_inputs + j] for i in range(num_inputs) for j in range(i, num_inputs)], 1) # fm_xx[i*num_inputs + j] ????
             fm_x_con = tf.concat([fm_x[i] for i in range(num_inputs)], 1)
 
             fm_xx_con = tf.reshape(fm_xx_con, [-1])
             fm_x_con = tf.reshape(fm_x_con, [-1])
 
             l = tf.nn.dropout(                     #
-                utils.activate(x, layer_acts[0]),  # def activate(weights, activation_function):    'layer_acts': ['tanh', 'none'], 返回一个tensor
+                utils.activate(x, layer_acts[0]),  # def activate(weights, activation_function):    'layer_acts': ['tanh', 'none'], ????tensor
                 self.layer_keeps[0])               # With probability keep_prob, outputs the input element scaled up by 1 / keep_prob, otherwise outputs 0
 
-            for i in range(1, len(layer_sizes) - 1): #l2以及后面的hidden layer
+            for i in range(1, len(layer_sizes) - 1): #l2?????hidden layer
                 wi = self.vars['w%d' % i]
                 bi = self.vars['b%d' % i]
                 l = tf.nn.dropout(                 # tf.nn.dropout(x, keep_prob, noise_shape=None, seed=None, name=None)
-                    utils.activate(                # def activate(weights, activation_function)   定义激活函数,加入计算图
+                    utils.activate(                # def activate(weights, activation_function)   ??????,?????
                         tf.matmul(l, wi) + bi,
                         layer_acts[i]),
                     self.layer_keeps[i])
 
-            l = tf.concat([1, fm_xx_con, fm_x_con], -1)  #进入l之前进行整合
-            l = tf.reshape(l, [-1])                # A Tensor of the same shape of x  ,相当于打散为1维
+            l = tf.concat([1, fm_xx_con, fm_x_con], -1)  #??l??????
+            l = tf.reshape(l, [-1])                # A Tensor of the same shape of x  ,??????1?
 
 
 
 
 
-            self.y_prob = tf.sigmoid(l)            # 由此得到y,之后可以进行计算了
+            self.y_prob = tf.sigmoid(l)            # ????y,?????????
 
             self.loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=l, labels=self.y))
             if layer_l2 is not None:
                 # for i in range(num_inputs):
                 self.loss += layer_l2[0] * tf.nn.l2_loss(tf.concat(xw, 1))
                 for i in range(1, len(layer_sizes) - 1):
-                    wi = self.vars['w%d' % i]  # 整个网络中的w都会被加入正则化
+                    wi = self.vars['w%d' % i]  # ??????w????????
                     # bi = self.vars['b%d' % i]
                     self.loss += layer_l2[i] * tf.nn.l2_loss(wi)
             self.optimizer = utils.get_optimizer(opt_algo, learning_rate, self.loss)
 
             config = tf.ConfigProto()
-            config.gpu_options.allow_growth = True   #使用allow_growth option，刚一开始分配少量的GPU容量，然后按需慢慢的增加，由于不会释放内存，所以会导致碎片
+            config.gpu_options.allow_growth = True   #??allow_growth option,?????????GPU??,?????????,????????,???????
             self.sess = tf.Session(config=config)
             tf.global_variables_initializer().run(session=self.sess)
 
